@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>QR Generator</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #3222e5, #764ba2);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 400px;
+            max-width: 90%;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .description {
+            color: #777;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        #generateBtn {
+            background: #667eea;
+            color: white;
+        }
+
+        #generateBtn:hover {
+            background: #5568d8;
+        }
+
+        #clearBtn {
+            background: #ddd;
+            color: #333;
+        }
+
+        #downloadBtn {
+            background: #28a745;
+            color: white;
+            display: none;
+        }
+
+        .qr-box {
+            margin: 20px 0;
+            min-height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #qrImage {
+            width: 200px;
+            height: 200px;
+            display: none;
+        }
+
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+        
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>QR Generator</h1>
+
+        <p class="description">
+            Enter text or URL to generate QR Code
+        </p>
+
+        <input
+            type="text"
+            id="qrText"
+            placeholder="Enter text or URL"
+        >
+
+        <button id="generateBtn">
+            Generate QR Code
+        </button>
+
+        <div class="qr-box">
+
+            <img id="qrImage" alt="QR Code">
+
+        </div>
+
+        <p id="message"></p>
+
+        <button id="downloadBtn">
+            Download QR Code
+        </button>
+
+        <button id="clearBtn">
+            Clear
+        </button>
+
+    </div>
+    <script>
+    const qrText = document.getElementById("qrText");
+    const qrImage = document.getElementById("qrImage");
+    const generateBtn = document.getElementById("generateBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const message = document.getElementById("message");
+    let qrURL = "";
+
+    generateBtn.addEventListener("click", function () {
+
+        let text = qrText.value.trim();
+
+        if (text === "") {
+
+            message.textContent = "Please enter text or URL.";
+
+            qrImage.style.display = "none";
+
+            downloadBtn.style.display = "none";
+
+            return;
+        }
+
+        message.textContent = "";
+
+        qrURL =
+            "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data="
+            + encodeURIComponent(text);
+
+        qrImage.src = qrURL;
+
+        qrImage.style.display = "block";
+        downloadBtn.style.display = "block";
+
+    });
+
+    clearBtn.addEventListener("click", function () {
+
+        qrText.value = "";
+
+        qrImage.src = "";
+
+        qrImage.style.display = "none";
+
+        downloadBtn.style.display = "none";
+
+        message.textContent = "";
+
+        qrURL = "";
+
+    });
+
+       downloadBtn.addEventListener("click", async function () {
+
+    if (qrURL === "") {
+        return;
+    }
+
+    try {
+
+        const response = await fetch(qrURL);
+
+    
+        const blob = await response.blob();
+
+     
+        const imageURL = URL.createObjectURL(blob);
+
+    
+        const link = document.createElement("a");
+
+        link.href = imageURL;
+        link.download = "qr-code.png";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+        URL.revokeObjectURL(imageURL);
+
+    } catch (error) {
+
+        console.log("Download failed:", error);
+
+    }
+
+});
+
+    qrText.addEventListener("keydown", function (event) {
+
+        if (event.key === "Enter") {
+
+            generateBtn.click();
+
+        }
+
+    });
+
+    </script>
+
+</body>
+
+</html>
